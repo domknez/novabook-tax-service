@@ -1,0 +1,35 @@
+{
+  "name": "tax-service",
+  "version": "1.0.0",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "ts-node src/index.ts",
+    "seed": "ts-node db/seed/seed.ts",
+    "amend-data": "ts-node db/seed/amend-data.ts",
+    "build": "tsc"
+  },
+  "keywords": [],
+  "author": "Domagoj Knez",
+  "license": "ISC",
+  "description": "Tech task for the Software Engineer position at Novabook",
+  "dependencies": {
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.14.0",
+    "dotenv": "^16.4.2",
+    "express": "^4.18.2",
+    "morgan": "^1.10.0",
+    "pg": "^8.11.1",
+    "reflect-metadata": "^0.1.13",
+    "typeorm": "^0.3.17",
+    "uuid": "^10.0.0"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.17",
+    "@types/morgan": "^1.9.9",
+    "@types/node": "^20.3.1",
+    "@types/uuid": "^10.0.0",
+    "nodemon": "^3.1.7",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.1.3"
+  }
+}
