@@ -32,9 +32,11 @@ export class EventService {
   async getTaxPosition(dateString: string): Promise<{ date: string; taxPosition: number }> {
     const queryDate = new Date(dateString)
 
-    const salesEvents = await this.getAllSalesEvents()
-    const taxPayments = await this.getTaxPaymentsUpToDate(queryDate)
-    const amendments = await this.getAllAmendments()
+    const [salesEvents, amendments, taxPayments] = await Promise.all([
+      this.getAllSalesEvents(),
+      this.getAllAmendments(),
+      this.getTaxPaymentsUpToDate(queryDate),
+    ])
 
     const itemsMap = this.buildItemsAsOfDate(salesEvents, amendments, queryDate)
 
@@ -76,7 +78,19 @@ export class EventService {
     const itemEventsMap = new Map<string, ItemEvent[]>()
     let eventIndex = 0
 
-    // Process sales events
+    this.processSalesEvents(salesEvents, itemEventsMap, eventIndex)
+    this.processAmendments(amendments, itemEventsMap, eventIndex)
+
+    const finalItemsMap = this.selectLatestEvents(itemEventsMap, queryDate)
+
+    return finalItemsMap
+  }
+
+  private processSalesEvents(
+    salesEvents: SalesEvent[],
+    itemEventsMap: Map<string, ItemEvent[]>,
+    eventIndex: number
+  ): void {
     salesEvents.forEach((salesEvent) => {
       salesEvent.items.forEach((item) => {
         const key = getItemKey(salesEvent.invoiceId, item.itemId)
@@ -90,8 +104,13 @@ export class EventService {
         addToItemEventsMap(itemEventsMap, key, event)
       })
     })
+  }
 
-    // Process amendments
+  private processAmendments(
+    amendments: Amendment[],
+    itemEventsMap: Map<string, ItemEvent[]>,
+    eventIndex: number
+  ): void {
     amendments.forEach((amendment) => {
       const key = getItemKey(amendment.invoiceId, amendment.itemId)
       const event: ItemEvent = {
@@ -103,47 +122,57 @@ export class EventService {
       }
       addToItemEventsMap(itemEventsMap, key, event)
     })
+  }
 
-    // For each item, pick the latest amendment or sale before or on the query date
+  private selectLatestEvents(itemEventsMap: Map<string, ItemEvent[]>, queryDate: Date): Map<string, ItemEvent> {
     const finalItemsMap = new Map<string, ItemEvent>()
 
     itemEventsMap.forEach((events, key) => {
-      // Filter events up to the query date
       const validEvents = events.filter((e) => e.date <= queryDate)
+
       if (validEvents.length > 0) {
-        // Split events into amendments and sales
-        const amendments = validEvents.filter((e) => e.eventType === 'amendment')
-        if (amendments.length > 0) {
-          // Pick the latest amendment
-          amendments.sort((a, b) => {
-            const dateDiff = b.date.getTime() - a.date.getTime()
-            return dateDiff !== 0 ? dateDiff : b.index - a.index
-          })
-          finalItemsMap.set(key, amendments[0])
-        } else {
-          // No amendments, pick the latest sale
-          const sales = validEvents.filter((e) => e.eventType === 'sale')
-          sales.sort((a, b) => {
-            const dateDiff = b.date.getTime() - a.date.getTime()
-            return dateDiff !== 0 ? dateDiff : b.index - a.index
-          })
-          finalItemsMap.set(key, sales[0])
-        }
+        const latestEvent = this.getLatestEvent(validEvents)
+        finalItemsMap.set(key, latestEvent)
       }
     })
 
     return finalItemsMap
   }
 
+  private getLatestEvent(events: ItemEvent[]): ItemEvent {
+    // Separate amendments and sales
+    const amendments = events.filter((e) => e.eventType === 'amendment')
+    const sales = events.filter((e) => e.eventType === 'sale')
+
+    if (amendments.length > 0) {
+      // Sort amendments and return the latest
+      return amendments.sort(this.compareEvents)[0]
+    } else {
+      // Sort sales and return the latest
+      return sales.sort(this.compareEvents)[0]
+    }
+  }
+
+  private compareEvents(a: ItemEvent, b: ItemEvent): number {
+    const dateDiff = b.date.getTime() - a.date.getTime()
+    if (dateDiff !== 0) {
+      return dateDiff
+    } else {
+      return b.index - a.index
+    }
+  }
+
   private calculateTotalTaxFromItemsMap(itemsMap: Map<string, ItemEvent>): number {
     let totalTax = 0
     itemsMap.forEach((item) => {
-      totalTax += item.cost * item.taxRate
+      const cost = item.cost || 0
+      const taxRate = item.taxRate || 0
+      totalTax += cost * taxRate
     })
     return totalTax
   }
 
   private calculateTotalTaxPayments(taxPayments: TaxPaymentEvent[]): number {
-    return taxPayments.reduce((total, payment) => total + payment.amount, 0)
+    return taxPayments.reduce((total, payment) => total + (payment.amount || 0), 0)
   }
 }
