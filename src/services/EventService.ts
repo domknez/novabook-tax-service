@@ -9,6 +9,8 @@ interface ItemEvent {
   date: Date
   cost: number
   taxRate: number
+  eventType: 'sale' | 'amendment'
+  index: number
 }
 
 export class EventService {
@@ -72,6 +74,7 @@ export class EventService {
     queryDate: Date
   ): Map<string, ItemEvent> {
     const itemEventsMap = new Map<string, ItemEvent[]>()
+    let eventIndex = 0
 
     // Process sales events
     salesEvents.forEach((salesEvent) => {
@@ -81,6 +84,8 @@ export class EventService {
           date: new Date(salesEvent.date),
           cost: item.cost,
           taxRate: item.taxRate,
+          eventType: 'sale',
+          index: eventIndex++,
         }
         addToItemEventsMap(itemEventsMap, key, event)
       })
@@ -93,21 +98,37 @@ export class EventService {
         date: new Date(amendment.date),
         cost: amendment.cost,
         taxRate: amendment.taxRate,
+        eventType: 'amendment',
+        index: eventIndex++,
       }
       addToItemEventsMap(itemEventsMap, key, event)
     })
 
-    // For each item, pick the latest event before or on the query date
+    // For each item, pick the latest amendment or sale before or on the query date
     const finalItemsMap = new Map<string, ItemEvent>()
 
     itemEventsMap.forEach((events, key) => {
       // Filter events up to the query date
       const validEvents = events.filter((e) => e.date <= queryDate)
       if (validEvents.length > 0) {
-        // Sort events by date descending
-        validEvents.sort((a, b) => b.date.getTime() - a.date.getTime())
-        // Pick the latest event
-        finalItemsMap.set(key, validEvents[0])
+        // Split events into amendments and sales
+        const amendments = validEvents.filter((e) => e.eventType === 'amendment')
+        if (amendments.length > 0) {
+          // Pick the latest amendment
+          amendments.sort((a, b) => {
+            const dateDiff = b.date.getTime() - a.date.getTime()
+            return dateDiff !== 0 ? dateDiff : b.index - a.index
+          })
+          finalItemsMap.set(key, amendments[0])
+        } else {
+          // No amendments, pick the latest sale
+          const sales = validEvents.filter((e) => e.eventType === 'sale')
+          sales.sort((a, b) => {
+            const dateDiff = b.date.getTime() - a.date.getTime()
+            return dateDiff !== 0 ? dateDiff : b.index - a.index
+          })
+          finalItemsMap.set(key, sales[0])
+        }
       }
     })
 
