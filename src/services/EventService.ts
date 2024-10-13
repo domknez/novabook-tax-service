@@ -3,15 +3,8 @@ import { SalesEvent } from '../entities/SalesEvent'
 import { TaxPaymentEvent } from '../entities/TaxPaymentEvent'
 import { Amendment } from '../entities/Amendment'
 import { LessThanOrEqual } from 'typeorm'
-import { addToItemEventsMap, getItemKey } from '../utils/eventUtils'
-
-interface ItemEvent {
-  date: Date
-  cost: number
-  taxRate: number
-  eventType: 'sale' | 'amendment'
-  index: number
-}
+import { addToItemEventsMap, getItemKey, compareEvents, getLatestEvent } from '../utils/eventUtils'
+import { ItemEvent } from '../common/types'
 
 export class EventService {
   async addSalesEvent(salesEvent: SalesEvent): Promise<void> {
@@ -131,35 +124,12 @@ export class EventService {
       const validEvents = events.filter((e) => e.date <= queryDate)
 
       if (validEvents.length > 0) {
-        const latestEvent = this.getLatestEvent(validEvents)
+        const latestEvent = getLatestEvent(validEvents)
         finalItemsMap.set(key, latestEvent)
       }
     })
 
     return finalItemsMap
-  }
-
-  private getLatestEvent(events: ItemEvent[]): ItemEvent {
-    // Separate amendments and sales
-    const amendments = events.filter((e) => e.eventType === 'amendment')
-    const sales = events.filter((e) => e.eventType === 'sale')
-
-    if (amendments.length > 0) {
-      // Sort amendments and return the latest
-      return amendments.sort(this.compareEvents)[0]
-    } else {
-      // Sort sales and return the latest
-      return sales.sort(this.compareEvents)[0]
-    }
-  }
-
-  private compareEvents(a: ItemEvent, b: ItemEvent): number {
-    const dateDiff = b.date.getTime() - a.date.getTime()
-    if (dateDiff !== 0) {
-      return dateDiff
-    } else {
-      return b.index - a.index
-    }
   }
 
   private calculateTotalTaxFromItemsMap(itemsMap: Map<string, ItemEvent>): number {
