@@ -102,15 +102,15 @@ Content-Type: application/json
 {
   "eventType": "SALES",
   "date": "2024-02-22T10:00:00Z",
-  "invoiceId": "invoice-001",
+  "invoiceId": "7dc7e1f1-4331-4650-8740-60058621f449",
   "items": [
     {
-      "itemId": "item-001",
+      "itemId": "52b9ebd5-4015-48ae-a368-ff51563f40e4",
       "cost": 1000,
       "taxRate": 0.2
     },
     {
-      "itemId": "item-002",
+      "itemId": "80f4d3b9-0299-40ec-9c22-0730481f02d6",
       "cost": 2000,
       "taxRate": 0.2
     }
@@ -171,10 +171,10 @@ Content-Type: application/json
 {
   "eventType": "SALES",
   "date": "2024-02-23T12:00:00Z",
-  "invoiceId": "invoice-002",
+  "invoiceId": "a8a9e8fb-1a5f-4112-8ac7-1694d7e2354d",
   "items": [
     {
-      "itemId": "item-003",
+      "itemId": "e511e143-f298-4f1d-afb6-75f8ab6828ce",
       "cost": 1500,
       "taxRate": 0.1
     }
@@ -228,14 +228,14 @@ Explanation:
 Request
 
 ```http
-POST /amend-sale HTTP/1.1
+PATCH /sale HTTP/1.1
 Host: localhost:3000
 Content-Type: application/json
 
 {
   "date": "2024-02-23T10:00:00Z",
-  "invoiceId": "invoice-001",
-  "itemId": "item-002",
+  "invoiceId": "7dc7e1f1-4331-4650-8740-60058621f449",
+  "itemId": "80f4d3b9-0299-40ec-9c22-0730481f02d6",
   "cost": 1800,
   "taxRate": 0.17
 }
@@ -250,7 +250,7 @@ Expected Response:
 
 Explanation:
 
-- Action: Amends the cost and tax rate of item-002 in invoice-001.
+- Action: Amends the cost and tax rate of 80f4d3b9-0299-40ec-9c22-0730481f02d6 in 7dc7e1f1-4331-4650-8740-60058621f449.
 - Effect: Adjusts the tax liability for that item.
 
 ## Step 9: Query Tax Position After the Amendment
@@ -348,15 +348,15 @@ Content-Type: application/json
 {
   "eventType": "SALES",
   "date": "2024-02-24T15:00:00Z",
-  "invoiceId": "invoice-003",
+  "invoiceId": "61c8b37b-e09a-4acc-8fcc-0c8428b13961",
   "items": [
     {
-      "itemId": "item-004",
+      "itemId": "71a07026-d075-438e-9862-ca061fb682a8",
       "cost": 2500,
       "taxRate": 0.15
     },
     {
-      "itemId": "item-005",
+      "itemId": "91009206-d745-4d56-b977-3fb1031c21cf",
       "cost": 3000,
       "taxRate": 0.18
     }
@@ -381,14 +381,14 @@ Explanation:
 Request:
 
 ```http
-POST /amend-sale HTTP/1.1
+PATCH /sale HTTP/1.1
 Host: localhost:3000
 Content-Type: application/json
 
 {
 "date": "2024-02-24T16:30:00Z",
-  "invoiceId": "invoice-003",
-  "itemId": "item-005",
+  "invoiceId": "61c8b37b-e09a-4acc-8fcc-0c8428b13961",
+  "itemId": "91009206-d745-4d56-b977-3fb1031c21cf",
   "cost": 2800,
   "taxRate": 0.15
 }
@@ -403,7 +403,7 @@ Expected Response:
 
 Explanation:
 
-- Action: Amends item-005 in invoice-003.
+- Action: Amends 91009206-d745-4d56-b977-3fb1031c21cf in 61c8b37b-e09a-4acc-8fcc-0c8428b13961.
 - Effect: Adjusts the tax liability for that item.
 
 ## Step 14: Query Tax Position After the Third Sales Event and Amendment
@@ -441,7 +441,7 @@ Explanation:
 Request:
 
 ```http
-POST /amend-sale HTTP/1.1
+PATCH /sale HTTP/1.1
 Host: localhost:3000
 Content-Type: application/json
 
@@ -498,14 +498,14 @@ Request:
 First Amendment
 
 ```http
-POST /amend-sale HTTP/1.1
+PATCH /sale HTTP/1.1
 Host: localhost:3000
 Content-Type: application/json
 
 {
   "date": "2024-02-25T12:00:00Z",
-  "invoiceId": "invoice-003",
-  "itemId": "item-005",
+  "invoiceId": "61c8b37b-e09a-4acc-8fcc-0c8428b13961",
+  "itemId": "91009206-d745-4d56-b977-3fb1031c21cf",
   "cost": 2600,
   "taxRate": 0.14
 }
@@ -514,14 +514,14 @@ Content-Type: application/json
 Second Amendment
 
 ```http
-POST /amend-sale HTTP/1.1
+PATCH /sale HTTP/1.1
 Host: localhost:3000
 Content-Type: application/json
 
 {
   "date": "2024-02-25T13:00:00Z",
-  "invoiceId": "invoice-003",
-  "itemId": "item-005",
+  "invoiceId": "61c8b37b-e09a-4acc-8fcc-0c8428b13961",
+  "itemId": "91009206-d745-4d56-b977-3fb1031c21cf",
   "cost": 2400,
   "taxRate": 0.12
 }
@@ -536,7 +536,7 @@ Expected Response:
 
 Explanation
 
-- Action: Applies two amendments to item-005 in invoice-003.
+- Action: Applies two amendments to 91009206-d745-4d56-b977-3fb1031c21cf in 61c8b37b-e09a-4acc-8fcc-0c8428b13961.
 - Effect: Adjusts the tax liability for that item multiple times.
 
 ## Step 18: Query Tax Position After Multiple Amendments
