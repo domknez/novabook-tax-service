@@ -121,7 +121,7 @@ export class EventService {
     const finalItemsMap = new Map<string, ItemEvent>()
 
     itemEventsMap.forEach((events, key) => {
-      const validEvents = events.filter((e) => e.date <= queryDate)
+      const validEvents = events.filter((event) => event.date <= queryDate)
 
       if (validEvents.length > 0) {
         const latestEvent = getLatestEvent(validEvents)

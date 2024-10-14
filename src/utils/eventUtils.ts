@@ -15,27 +15,28 @@ export function addToItemEventsMap(map: Map<string, ItemEvent[]>, key: string, e
   }
 }
 
-export function compareEvents(a: ItemEvent, b: ItemEvent): number {
-  const dateDiff = b.date.getTime() - a.date.getTime()
+export function compareEvents(firstEvent: ItemEvent, secondEvent: ItemEvent): number {
+  const dateDiff = secondEvent.date.getTime() - firstEvent.date.getTime()
   if (dateDiff !== 0) {
     return dateDiff
   } else {
-    return b.index - a.index
+    return secondEvent.index - firstEvent.index
   }
 }
 
 export function getLatestEvent(events: ItemEvent[]): ItemEvent {
   // Separate amendments and sales
   const amendments = events.filter((e) => e.eventType === 'amendment')
-  const sales = events.filter((e) => e.eventType === 'sale')
 
   if (amendments.length > 0) {
     // Sort amendments and return the latest
     amendments.sort(compareEvents)
     return amendments[0]
-  } else {
-    // Sort sales and return the latest
-    sales.sort(compareEvents)
-    return sales[0]
   }
+
+  const sales = events.filter((e) => e.eventType === 'sale')
+
+  // Sort sales and return the latest
+  sales.sort(compareEvents)
+  return sales[0]
 }
