@@ -1,14 +1,14 @@
-import express from 'express';
-import { ingestTransaction } from '../controllers/transactionController';
-import { queryTaxPosition } from '../controllers/taxPositionController';
-import { amendSale } from '../controllers/amendSaleController';
+import express from 'express'
+import { ingestTransaction } from '../controllers/transactionController'
+import { queryTaxPosition } from '../controllers/taxPositionController'
+import { amendSale } from '../controllers/amendSaleController'
 
-const router = express.Router();
+const router = express.Router()
 
-router.post('/transactions', ingestTransaction);
+router.post('/transactions', ingestTransaction)
 
-router.get('/tax-position', queryTaxPosition);
+router.get('/tax-position', queryTaxPosition)
 
-router.patch('/sale', amendSale);
+router.patch('/sale', amendSale)
 
-export default router;
+export default router
