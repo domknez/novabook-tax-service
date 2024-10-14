@@ -5,9 +5,9 @@ services:
     image: postgres:13
     restart: always
     environment:
-      POSTGRES_USER: novabook_user
-      POSTGRES_PASSWORD: novabook_pass
-      POSTGRES_DB: novabook_db
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_DATABASE}
     ports:
       - '5432:5432'
     volumes:
