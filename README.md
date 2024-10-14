@@ -13,6 +13,8 @@ This application processes sales events, tax payments, and amendments to calcula
 - [API Endpoints](#api-endpoints)
 - [Notes](#notes)
 - [Observability](#observability)
+- [Additional Information](#additional-information)
+- [Examples](#examples)
 
 ## Prerequisites
 
@@ -124,3 +126,7 @@ In this application, observability is achieved through:
   - Source code is mounted in the Docker container and all file changes are monitored with `nodemon` and applied automatically.
 - **Seeds**
   - There is no smart logic behind importing the seed data, which means that as long as we have the `RUN_SEED` variable set to true in our `.env` file, the seed script will be executed resulting in importing new (or actually the same) rows with every app startup.
+
+## Examples
+
+Complete examples of requests that can be sent manually, along with expected responses and explanations, can be found in the [examples/README.md](examples/README.md) file.
