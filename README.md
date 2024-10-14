@@ -62,19 +62,16 @@ This will run all the unit tests, including the edge cases, to ensure the applic
 
 The application exposes the following API endpoints:
 
-- Sales Events:
+- Ingest Endpoint:
 
-  - `POST /sales-events`: Add a new sales event.
+  - `POST /transactions`: Allows a user to end sales and tax payment events to the service. It receives both `SALES` and `TAX_PAYMENT` events.
 
-- Tax Payment Events:
+- Query Tax Position Endpoint:
 
-  - `POST /tax-payments`: Add a new tax payment event.
+  - `GET /tax-position`: Allows a user to query their tax position at any given point in time. This endpoint calculates the tax position from ingested events and any furhter user interaction..
 
-- Amendments:
-  `POST /amendments`: Add a new amendment to a sales event.
-
-- Tax Position:
-  `GET /tax-position?date=YYYY-MM-DDTHH:mm:ssZ`: Get the tax position as of the specified date.
+- Amend Sale Endpoint:
+  - `PATCH /sale`: Allows a user to modify an item within a sale at a specific point in time. The sevice accepts all amendments even if the sale does not exist yet.
 
 ## Notes
 
