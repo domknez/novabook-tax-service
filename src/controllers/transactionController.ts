@@ -19,7 +19,7 @@ const handleSalesEvent = async (event: SalesEvent, res: Response) => {
 
   if (salesErrors.length > 0) {
     console.error(salesErrors)
-    return res.status(400).send('Invalid sales event data')
+    return res.status(400).json({ message: 'Invalid sales event data', errors: salesErrors })
   }
 
   await eventService.addSalesEvent(salesEvent)
@@ -32,7 +32,7 @@ const handleTaxPaymentEvent = async (event: TaxPaymentEvent, res: Response) => {
 
   if (taxPaymentErrors.length > 0) {
     console.error(taxPaymentErrors)
-    return res.status(400).send('Invalid tax payment event data')
+    return res.status(400).json({ message: 'Invalid tax payment event data', errors: taxPaymentErrors })
   }
 
   await eventService.addTaxPaymentEvent(taxPaymentEvent)
@@ -41,10 +41,6 @@ const handleTaxPaymentEvent = async (event: TaxPaymentEvent, res: Response) => {
 
 export const ingestTransaction = async (req: Request, res: Response) => {
   const event = req.body
-
-  if (!event || !event.eventType || !event.date) {
-    return res.status(400).send('Invalid event data')
-  }
 
   try {
     switch (event.eventType) {

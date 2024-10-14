@@ -12,7 +12,7 @@ export const amendSale = async (req: Request, res: Response) => {
 
     if (errors.length > 0) {
       console.error(errors)
-      return res.status(400).send('Invalid amendment data')
+      return res.status(400).json({ message: 'Invalid amendment data', errors })
     }
 
     await eventService.addAmendment(amendment)

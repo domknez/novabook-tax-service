@@ -1,11 +1,11 @@
-import { DataSource } from 'typeorm';
-import dotenv from 'dotenv';
-import { SalesEvent } from './src/entities/SalesEvent';
-import { SalesItem } from './src/entities/SalesItem';
-import { TaxPaymentEvent } from './src/entities/TaxPaymentEvent';
-import { Amendment } from './src/entities/Amendment';
+import { DataSource } from 'typeorm'
+import dotenv from 'dotenv'
+import { SalesEvent } from './src/entities/SalesEvent'
+import { SalesItem } from './src/entities/SalesItem'
+import { TaxPaymentEvent } from './src/entities/TaxPaymentEvent'
+import { Amendment } from './src/entities/Amendment'
 
-dotenv.config();
+dotenv.config()
 
 export const AppDataSource = new DataSource({
   type: 'postgres',
@@ -19,4 +19,4 @@ export const AppDataSource = new DataSource({
   entities: [SalesEvent, SalesItem, TaxPaymentEvent, Amendment],
   migrations: [],
   subscribers: [],
-});
+})

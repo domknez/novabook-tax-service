@@ -1,7 +1,7 @@
 import express from 'express'
-import { ingestTransaction } from '../controllers/transactionController'
-import { queryTaxPosition } from '../controllers/taxPositionController'
 import { amendSale } from '../controllers/amendSaleController'
+import { queryTaxPosition } from '../controllers/taxPositionController'
+import { ingestTransaction } from '../controllers/transactionController'
 
 const router = express.Router()
 

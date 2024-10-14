@@ -5,26 +5,36 @@ import { Amendment } from '../entities/Amendment'
 import { LessThanOrEqual } from 'typeorm'
 import { addToItemEventsMap, getItemKey, compareEvents, getLatestEvent } from '../utils/eventUtils'
 import { ItemEvent } from '../common/types'
+import { Decimal } from 'decimal.js'
 
 export class EventService {
+  private salesEventRepo = AppDataSource.getRepository(SalesEvent)
+  private taxPaymentRepo = AppDataSource.getRepository(TaxPaymentEvent)
+  private amendmentRepo = AppDataSource.getRepository(Amendment)
+
+  constructor(
+    salesEventRepo = AppDataSource.getRepository(SalesEvent),
+    taxPaymentRepo = AppDataSource.getRepository(TaxPaymentEvent),
+    amendmentRepo = AppDataSource.getRepository(Amendment)
+  ) {
+    this.salesEventRepo = salesEventRepo
+    this.taxPaymentRepo = taxPaymentRepo
+    this.amendmentRepo = amendmentRepo
+  }
+
   async addSalesEvent(salesEvent: SalesEvent): Promise<void> {
-    const salesEventRepo = AppDataSource.getRepository(SalesEvent)
-    await salesEventRepo.save(salesEvent)
+    await this.salesEventRepo.save(salesEvent)
   }
 
   async addTaxPaymentEvent(taxPaymentEvent: TaxPaymentEvent): Promise<void> {
-    const taxPaymentRepo = AppDataSource.getRepository(TaxPaymentEvent)
-    await taxPaymentRepo.save(taxPaymentEvent)
+    await this.taxPaymentRepo.save(taxPaymentEvent)
   }
 
   async addAmendment(amendment: Amendment): Promise<void> {
-    const amendmentRepo = AppDataSource.getRepository(Amendment)
-    await amendmentRepo.save(amendment)
+    await this.amendmentRepo.save(amendment)
   }
 
-  async getTaxPosition(dateString: string): Promise<{ date: string; taxPosition: number }> {
-    const queryDate = new Date(dateString)
-
+  async getTaxPosition(queryDate: Date): Promise<{ date: string; taxPosition: number }> {
     const [salesEvents, amendments, taxPayments] = await Promise.all([
       this.getAllSalesEvents(),
       this.getAllAmendments(),
@@ -39,26 +49,23 @@ export class EventService {
     const taxPosition = totalTaxFromSales - totalTaxPayments
 
     return {
-      date: dateString,
+      date: queryDate.toISOString(),
       taxPosition: taxPosition,
     }
   }
 
   private async getAllSalesEvents(): Promise<SalesEvent[]> {
-    const salesEventRepo = AppDataSource.getRepository(SalesEvent)
-    return salesEventRepo.find({
+    return this.salesEventRepo.find({
       relations: ['items'],
     })
   }
 
   private async getAllAmendments(): Promise<Amendment[]> {
-    const amendmentRepo = AppDataSource.getRepository(Amendment)
-    return amendmentRepo.find()
+    return this.amendmentRepo.find()
   }
 
   private async getTaxPaymentsUpToDate(date: Date): Promise<TaxPaymentEvent[]> {
-    const taxPaymentRepo = AppDataSource.getRepository(TaxPaymentEvent)
-    return taxPaymentRepo.find({
+    return this.taxPaymentRepo.find({
       where: { date: LessThanOrEqual(date.toISOString()) },
     })
   }
@@ -133,16 +140,21 @@ export class EventService {
   }
 
   private calculateTotalTaxFromItemsMap(itemsMap: Map<string, ItemEvent>): number {
-    let totalTax = 0
+    let totalTax = new Decimal(0)
     itemsMap.forEach((item) => {
-      const cost = item.cost || 0
-      const taxRate = item.taxRate || 0
-      totalTax += cost * taxRate
+      const cost = new Decimal(item.cost || 0)
+      const taxRate = new Decimal(item.taxRate || 0)
+      totalTax = totalTax.plus(cost.times(taxRate))
     })
-    return totalTax
+    return totalTax.toNumber()
   }
 
   private calculateTotalTaxPayments(taxPayments: TaxPaymentEvent[]): number {
-    return taxPayments.reduce((total, payment) => total + (payment.amount || 0), 0)
+    return taxPayments
+      .reduce((total, payment) => {
+        const amount = new Decimal(payment.amount || 0)
+        return total.plus(amount)
+      }, new Decimal(0))
+      .toNumber()
   }
 }

@@ -1,9 +1,8 @@
-import { EventService } from '../EventService'
+import { Repository } from 'typeorm'
+import { Amendment } from '../../entities/Amendment'
 import { SalesEvent } from '../../entities/SalesEvent'
 import { TaxPaymentEvent } from '../../entities/TaxPaymentEvent'
-import { Amendment } from '../../entities/Amendment'
-import { AppDataSource } from '../../../ormconfig'
-import { Repository } from 'typeorm'
+import { EventService } from '../EventService'
 
 jest.mock('../../../ormconfig', () => ({
   AppDataSource: {
@@ -36,15 +35,8 @@ describe('EventService', () => {
       find: jest.fn(),
       save: jest.fn(),
     } as any
-    ;(AppDataSource.getRepository as jest.Mock).mockImplementation((entity) => {
-      if (entity === SalesEvent) {
-        return salesEventRepo
-      } else if (entity === TaxPaymentEvent) {
-        return taxPaymentRepo
-      } else if (entity === Amendment) {
-        return amendmentRepo
-      }
-    })
+
+    eventService = new EventService(salesEventRepo, taxPaymentRepo, amendmentRepo)
   })
 
   test('should return zero tax position when no events are present', async () => {
@@ -52,10 +44,11 @@ describe('EventService', () => {
     ;(taxPaymentRepo.find as jest.Mock).mockResolvedValue([])
     ;(amendmentRepo.find as jest.Mock).mockResolvedValue([])
 
-    const result = await eventService.getTaxPosition('2024-02-22T08:00:00Z')
+    const queryDate = new Date('2024-02-22T08:00:00Z')
+    const result = await eventService.getTaxPosition(queryDate)
 
     expect(result).toEqual({
-      date: '2024-02-22T08:00:00Z',
+      date: queryDate.toISOString(),
       taxPosition: 0,
     })
   })
@@ -70,10 +63,11 @@ describe('EventService', () => {
     ])
     ;(amendmentRepo.find as jest.Mock).mockResolvedValue([])
 
-    const result = await eventService.getTaxPosition('2024-02-22T09:30:00Z')
+    const queryDate = new Date('2024-02-22T09:30:00Z')
+    const result = await eventService.getTaxPosition(queryDate)
 
     expect(result).toEqual({
-      date: '2024-02-22T09:30:00Z',
+      date: queryDate.toISOString(),
       taxPosition: -500,
     })
   })
@@ -105,10 +99,11 @@ describe('EventService', () => {
     ])
     ;(amendmentRepo.find as jest.Mock).mockResolvedValue([])
 
-    const result = await eventService.getTaxPosition('2024-02-22T11:00:00Z')
+    const queryDate = new Date('2024-02-22T11:00:00Z')
+    const result = await eventService.getTaxPosition(queryDate)
 
     expect(result).toEqual({
-      date: '2024-02-22T11:00:00Z',
+      date: queryDate.toISOString(),
       taxPosition: 100,
     })
   })
@@ -151,10 +146,11 @@ describe('EventService', () => {
     ])
     ;(amendmentRepo.find as jest.Mock).mockResolvedValue([])
 
-    const result = await eventService.getTaxPosition('2024-02-23T13:00:00Z')
+    const queryDate = new Date('2024-02-23T13:00:00Z')
+    const result = await eventService.getTaxPosition(queryDate)
 
     expect(result).toEqual({
-      date: '2024-02-23T13:00:00Z',
+      date: queryDate.toISOString(),
       taxPosition: 250,
     })
   })
@@ -205,10 +201,11 @@ describe('EventService', () => {
       },
     ])
 
-    const result = await eventService.getTaxPosition('2024-02-23T13:00:00Z')
+    const queryDate = new Date('2024-02-23T13:00:00Z')
+    const result = await eventService.getTaxPosition(queryDate)
 
     expect(result).toEqual({
-      date: '2024-02-23T13:00:00Z',
+      date: queryDate.toISOString(),
       taxPosition: 156,
     })
   })
@@ -263,10 +260,11 @@ describe('EventService', () => {
       },
     ])
 
-    const result = await eventService.getTaxPosition('2024-02-24T14:30:00Z')
+    const queryDate = new Date('2024-02-24T13:00:00Z')
+    const result = await eventService.getTaxPosition(queryDate)
 
     expect(result).toEqual({
-      date: '2024-02-24T14:30:00Z',
+      date: queryDate.toISOString(),
       taxPosition: -844,
     })
   })
@@ -344,10 +342,11 @@ describe('EventService', () => {
       },
     ])
 
-    const result = await eventService.getTaxPosition('2024-02-24T17:00:00Z')
+    const queryDate = new Date('2024-02-24T17:00:00Z')
+    const result = await eventService.getTaxPosition(queryDate)
 
     expect(result).toEqual({
-      date: '2024-02-24T17:00:00Z',
+      date: queryDate.toISOString(),
       taxPosition: -49,
     })
   })
@@ -365,10 +364,11 @@ describe('EventService', () => {
       },
     ])
 
-    const result = await eventService.getTaxPosition('2024-02-22T13:00:00Z')
+    const queryDate = new Date('2024-02-22T13:00:00Z')
+    const result = await eventService.getTaxPosition(queryDate)
 
     expect(result).toEqual({
-      date: '2024-02-22T13:00:00Z',
+      date: queryDate.toISOString(),
       taxPosition: 50, // 500 * 0.1
     })
   })
@@ -405,10 +405,11 @@ describe('EventService', () => {
       },
     ])
 
-    const result = await eventService.getTaxPosition('2024-02-25T13:00:00Z')
+    const queryDate = new Date('2024-02-25T13:00:00Z')
+    const result = await eventService.getTaxPosition(queryDate)
 
     expect(result).toEqual({
-      date: '2024-02-25T13:00:00Z',
+      date: queryDate.toISOString(),
       taxPosition: 120, // 800 * 0.15
     })
   })
@@ -438,10 +439,11 @@ describe('EventService', () => {
       },
     ])
 
-    const result = await eventService.getTaxPosition('2024-02-26T11:00:00Z')
+    const queryDate = new Date('2024-02-26T11:00:00Z')
+    const result = await eventService.getTaxPosition(queryDate)
 
     expect(result).toEqual({
-      date: '2024-02-26T11:00:00Z',
+      date: queryDate.toISOString(),
       taxPosition: 324, // 1800 * 0.18
     })
   })
@@ -471,10 +473,11 @@ describe('EventService', () => {
       },
     ])
 
-    const result = await eventService.getTaxPosition('2024-02-27T12:00:00Z')
+    const queryDate = new Date('2024-02-27T12:00:00Z')
+    const result = await eventService.getTaxPosition(queryDate)
 
     expect(result).toEqual({
-      date: '2024-02-27T12:00:00Z',
+      date: queryDate.toISOString(),
       taxPosition: 0, // 0 * 0.1
     })
   })
@@ -504,17 +507,11 @@ describe('EventService', () => {
       },
     ])
 
-    const result = await eventService.getTaxPosition('2024-02-28T12:00:00Z')
-
-    // Tax from existing item
-    const taxExistingItem = 1200 * 0.2 // 240
-    // Tax from amendment to non-existent item
-    const taxAmendedItem = 1000 * 0.15 // 150
-    // Total tax
-    const totalTax = 240 + 150 // 390
+    const queryDate = new Date('2024-02-28T12:00:00Z')
+    const result = await eventService.getTaxPosition(queryDate)
 
     expect(result).toEqual({
-      date: '2024-02-28T12:00:00Z',
+      date: queryDate.toISOString(),
       taxPosition: 390,
     })
   })
@@ -544,10 +541,11 @@ describe('EventService', () => {
       },
     ])
 
-    const result = await eventService.getTaxPosition('2024-02-29T11:00:00Z')
+    const queryDate = new Date('2024-02-29T11:00:00Z')
+    const result = await eventService.getTaxPosition(queryDate)
 
     expect(result).toEqual({
-      date: '2024-02-29T11:00:00Z',
+      date: queryDate.toISOString(),
       taxPosition: 324, // 1800 * 0.18
     })
   })
@@ -577,10 +575,11 @@ describe('EventService', () => {
       },
     ])
 
-    const result = await eventService.getTaxPosition('2024-03-01T11:00:00Z')
+    const queryDate = new Date('2024-03-01T11:00:00Z')
+    const result = await eventService.getTaxPosition(queryDate)
 
     expect(result).toEqual({
-      date: '2024-03-01T11:00:00Z',
+      date: queryDate.toISOString(),
       taxPosition: 500, // 2500 * 0.2
     })
   })
@@ -617,10 +616,11 @@ describe('EventService', () => {
       },
     ])
 
-    const result = await eventService.getTaxPosition('2024-03-02T12:00:00Z')
+    const queryDate = new Date('2024-03-02T12:00:00Z')
+    const result = await eventService.getTaxPosition(queryDate)
 
     expect(result).toEqual({
-      date: '2024-03-02T12:00:00Z',
+      date: queryDate.toISOString(),
       taxPosition: 390, // 2600 * 0.15
     })
   })
@@ -637,10 +637,11 @@ describe('EventService', () => {
       },
     ])
 
-    const result = await eventService.getTaxPosition('2024-03-03T11:00:00Z')
+    const queryDate = new Date('2024-03-03T11:00:00Z')
+    const result = await eventService.getTaxPosition(queryDate)
 
     expect(result).toEqual({
-      date: '2024-03-03T11:00:00Z',
+      date: queryDate.toISOString(),
       taxPosition: -200, // -1000 * 0.2
     })
   })
@@ -658,10 +659,11 @@ describe('EventService', () => {
       },
     ])
 
-    const result = await eventService.getTaxPosition('2024-03-04T11:00:00Z')
+    const queryDate = new Date('2024-03-04T11:00:00Z')
+    const result = await eventService.getTaxPosition(queryDate)
 
     expect(result).toEqual({
-      date: '2024-03-04T11:00:00Z',
+      date: queryDate.toISOString(),
       taxPosition: 1200, // 1000 * 1.2
     })
   })
@@ -694,10 +696,11 @@ describe('EventService', () => {
     ;(taxPaymentRepo.find as jest.Mock).mockResolvedValue([])
     ;(amendmentRepo.find as jest.Mock).mockResolvedValue([])
 
-    const result = await eventService.getTaxPosition('2024-03-05T13:00:00Z')
+    const queryDate = new Date('2024-03-05T13:00:00Z')
+    const result = await eventService.getTaxPosition(queryDate)
 
     expect(result).toEqual({
-      date: '2024-03-05T13:00:00Z',
+      date: queryDate.toISOString(),
       taxPosition: 270, // 1500 * 0.18
     })
   })
@@ -727,10 +730,11 @@ describe('EventService', () => {
       },
     ])
 
-    const result = await eventService.getTaxPosition('2024-03-06T11:00:00Z')
+    const queryDate = new Date('2024-03-06T11:00:00Z')
+    const result = await eventService.getTaxPosition(queryDate)
 
     expect(result).toEqual({
-      date: '2024-03-06T11:00:00Z',
+      date: queryDate.toISOString(),
       taxPosition: 200, // 1000 * 0.2
     })
   })
@@ -760,10 +764,11 @@ describe('EventService', () => {
       },
     ])
 
-    const result = await eventService.getTaxPosition('2024-03-07T12:00:00Z')
+    const queryDate = new Date('2024-03-07T12:00:00Z')
+    const result = await eventService.getTaxPosition(queryDate)
 
     expect(result).toEqual({
-      date: '2024-03-07T12:00:00Z',
+      date: queryDate.toISOString(),
       taxPosition: 0,
     })
   })
@@ -788,10 +793,11 @@ describe('EventService', () => {
       },
     ])
 
-    const result = await eventService.getTaxPosition('2024-03-08T11:00:00Z')
+    const queryDate = new Date('2024-03-08T11:00:00Z')
+    const result = await eventService.getTaxPosition(queryDate)
 
     expect(result).toEqual({
-      date: '2024-03-08T11:00:00Z',
+      date: queryDate.toISOString(),
       taxPosition: 242, // 1100 * 0.22
     })
   })
@@ -813,10 +819,11 @@ describe('EventService', () => {
     ;(taxPaymentRepo.find as jest.Mock).mockResolvedValue([])
     ;(amendmentRepo.find as jest.Mock).mockResolvedValue([])
 
-    const result = await eventService.getTaxPosition('2024-03-09T11:00:00Z')
+    const queryDate = new Date('2024-03-09T11:00:00Z')
+    const result = await eventService.getTaxPosition(queryDate)
 
     expect(result).toEqual({
-      date: '2024-03-09T11:00:00Z',
+      date: queryDate.toISOString(),
       taxPosition: 0, // 1000 * 0
     })
   })
@@ -838,10 +845,11 @@ describe('EventService', () => {
     ;(taxPaymentRepo.find as jest.Mock).mockResolvedValue([])
     ;(amendmentRepo.find as jest.Mock).mockResolvedValue([])
 
-    const result = await eventService.getTaxPosition('2024-03-10T11:00:00Z')
+    const queryDate = new Date('2024-03-10T11:00:00Z')
+    const result = await eventService.getTaxPosition(queryDate)
 
     expect(result).toEqual({
-      date: '2024-03-10T11:00:00Z',
+      date: queryDate.toISOString(),
       taxPosition: 200_000_000, // 1e9 * 0.2
     })
   })
@@ -863,10 +871,11 @@ describe('EventService', () => {
     ;(taxPaymentRepo.find as jest.Mock).mockResolvedValue([])
     ;(amendmentRepo.find as jest.Mock).mockResolvedValue([])
 
-    const result = await eventService.getTaxPosition('2024-03-11T11:00:00Z')
+    const queryDate = new Date('2024-03-11T11:00:00Z')
+    const result = await eventService.getTaxPosition(queryDate)
 
     expect(result).toEqual({
-      date: '2024-03-11T11:00:00Z',
+      date: queryDate.toISOString(),
       taxPosition: 0,
     })
   })
@@ -908,10 +917,11 @@ describe('EventService', () => {
       },
     ])
 
-    const result = await eventService.getTaxPosition('2024-03-13T12:00:00Z')
+    const queryDate = new Date('2024-03-13T12:00:00Z')
+    const result = await eventService.getTaxPosition(queryDate)
 
     expect(result).toEqual({
-      date: '2024-03-13T12:00:00Z',
+      date: queryDate.toISOString(),
       taxPosition: 0,
     })
   })

@@ -80,7 +80,12 @@ The application exposes the following API endpoints:
   - The application allows amendments to be applied to sales events that have not yet been received. This means that an amendment can exist with a date before the sales event's date. The system will correctly apply such amendments when calculating the tax position.
 
 - **Event Ordering**:
+
   - Events are processed based on their dates and times. Amendments take precedence over sales events when determining the latest state of an item for a given date.
+
+- **Validation**:
+
+  - Currently, validation is pretty basic. It would be better to implement the validation middleware that would be handling the validation logic for the controllers.
 
 ## Observability
 
