@@ -55,8 +55,17 @@ When the application starts, it will check the SEED_DATA variable and, if true, 
 
 ## Running Tests
 
+### Running Tests Outside the Docker Container
+
+**Prerequisite**: `npm install` command is executed.
+
 To run the test suite, execute the following command: `npm run test`.
 This will run all the unit tests, including the edge cases, to ensure the application is functioning correctly.
+
+### Running Tests Inside the Docker Container
+
+When the Docker container is up and running, execute this command to enter the console in the running container: `docker compose exec app bash`.
+When inside the container, enter `npm run test` command.
 
 ## API Endpoints
 
@@ -113,3 +122,5 @@ In this application, observability is achieved through:
   - `docker compose up --build`
 - **Development**
   - Source code is mounted in the Docker container and all file changes are monitored with `nodemon` and applied automatically.
+- **Seeds**
+  - There is no smart logic behind importing the seed data, which means that as long as we have the `RUN_SEED` variable set to true in our `.env` file, the seed script will be executed resulting in importing new (or actually the same) rows with every app startup.
