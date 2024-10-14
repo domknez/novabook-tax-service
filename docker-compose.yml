@@ -17,19 +17,14 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    env_file:
+      - .env
     volumes:
       - .:/usr/src/app
       - /usr/src/app/node_modules
     ports:
       - '3000:3000'
     environment:
-      - RUN_SEED=${RUN_SEED}
       - NODE_ENV=development
-      - PORT=3000
-      - DB_HOST=db
-      - DB_PORT=5432
-      - DB_USERNAME=novabook_user
-      - DB_PASSWORD=novabook_pass
-      - DB_DATABASE=novabook_db
     depends_on:
       - db
