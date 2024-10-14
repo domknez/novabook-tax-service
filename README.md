@@ -23,7 +23,7 @@ This application processes sales events, tax payments, and amendments to calcula
 
 ### Environment Variables
 
-Create a `.env` file in the root directory of the project to configure your environment variables. An example `.env` file:
+Create a `.env` file (you can start by copying the existing `.env.example` file and simply renaming it) in the root directory of the project to configure your environment variables. An example `.env` file:
 
 ```env
 DB_HOST=db
